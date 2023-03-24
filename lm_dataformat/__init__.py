@@ -1,4 +1,5 @@
 import os
+import uuid
 import zstandard
 import ujson as json
 import time
@@ -283,8 +284,9 @@ class Archive:
         self.out_dir = out_dir
         os.makedirs(out_dir, exist_ok=True)
         self.i = 0
+        self.uuid = str(uuid.uuid4())
         
-        self.fh = open(self.out_dir + '/current_chunk_incomplete', 'wb')
+        self.fh = open(self.out_dir + '/current_chunk_incomplete' + self.uuid, 'wb')
         self.cctx = zstandard.ZstdCompressor(level=compression_level, threads=threads)
         self.compressor = self.cctx.stream_writer(self.fh)
         
@@ -298,8 +300,8 @@ class Archive:
         
         self.fh.flush()
         self.fh.close()
-        os.rename(self.out_dir + '/current_chunk_incomplete', fname)
-        self.fh = open(self.out_dir + '/current_chunk_incomplete', 'wb')
+        os.rename(self.out_dir + '/current_chunk_incomplete' + self.uuid, fname)
+        self.fh = open(self.out_dir + '/current_chunk_incomplete' + self.uuid, 'wb')
         self.compressor = self.cctx.stream_writer(self.fh)
 
         self.i += 1
